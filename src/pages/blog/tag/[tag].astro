@@ -1,24 +1,49 @@
 ---
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
-import BaseHead from '../../components/BaseHead.astro';
-import Footer from '../../components/Footer.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
-import Header from '../../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import BaseHead from '../../../components/BaseHead.astro';
+import Footer from '../../../components/Footer.astro';
+import FormattedDate from '../../../components/FormattedDate.astro';
+import Header from '../../../components/Header.astro';
+import { SITE_TITLE } from '../../../consts';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+export async function getStaticPaths() {
+	const posts = await getCollection('blog');
+	const tags = [...new Set(posts.flatMap((post) => post.data.tags ?? []))];
+	return tags.map((tag) => ({
+		params: { tag },
+		props: {
+			tag,
+			posts: posts
+				.filter((post) => post.data.tags?.includes(tag))
+				.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+		},
+	}));
+}
+
+const { tag, posts } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<BaseHead title={`#${tag} - ${SITE_TITLE}`} description={`Posts tagged with #${tag}`} />
 		<style>
 			main {
 				width: 960px;
+			}
+			.tag-header {
+				margin-bottom: 2em;
+			}
+			.tag-header h1 {
+				font-size: 2em;
+				margin-bottom: 0.25em;
+			}
+			.tag-header p {
+				color: rgb(var(--gray));
+				margin: 0;
+			}
+			.tag-header a {
+				font-size: 0.9em;
 			}
 			ul {
 				display: flex;
@@ -34,17 +59,6 @@ const posts = (await getCollection('blog')).sort(
 			ul li * {
 				text-decoration: none;
 				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul li:first-child img {
-				width: 100%;
-			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
 			}
 			ul li img {
 				margin-bottom: 0.5rem;
@@ -74,7 +88,6 @@ const posts = (await getCollection('blog')).sort(
 				flex-wrap: wrap;
 				gap: 0.4em;
 				margin-top: 0.5em;
-				justify-content: center;
 			}
 			.tag {
 				display: inline-block;
@@ -98,27 +111,23 @@ const posts = (await getCollection('blog')).sort(
 					width: 100%;
 					text-align: center;
 				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
-				}
 			}
 		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
+			<div class="tag-header">
+				<h1>#{tag}</h1>
+				<p>{posts.length}개의 포스트</p>
+				<a href="/blog/">&larr; 전체 포스트</a>
+			</div>
 			<section>
 				<ul>
 					{
 						posts.map((post) => (
 							<li>
 								<a href={`/blog/${post.id}/`}>
-									{post.data.heroImage && (
-										<Image width={720} height={360} src={post.data.heroImage} alt="" />
-									)}
 									<h4 class="title">{post.data.title}</h4>
 									<p class="date">
 										<FormattedDate date={post.data.pubDate} />
@@ -126,8 +135,8 @@ const posts = (await getCollection('blog')).sort(
 								</a>
 								{post.data.tags && post.data.tags.length > 0 && (
 									<div class="tags">
-										{post.data.tags.map((tag) => (
-											<a href={`/blog/tag/${tag}/`} class="tag">#{tag}</a>
+										{post.data.tags.map((t) => (
+											<a href={`/blog/tag/${t}/`} class:list={["tag", { active: t === tag }]}>#{t}</a>
 										))}
 									</div>
 								)}
