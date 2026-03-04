@@ -54,7 +54,7 @@ const { tag, posts } = Astro.props;
 				padding: 0;
 			}
 			ul li {
-				width: calc(50% - 1rem);
+				width: 100%;
 			}
 			ul li * {
 				text-decoration: none;
@@ -76,7 +76,7 @@ const { tag, posts } = Astro.props;
 				margin: 0;
 				color: rgb(var(--gray));
 			}
-			ul li a:hover h4,
+			ul li a:hover h5,
 			ul li a:hover .date {
 				color: rgb(var(--accent));
 			}
@@ -118,9 +118,9 @@ const { tag, posts } = Astro.props;
 		<Header />
 		<main>
 			<div class="tag-header">
+				<a href="/blog/">&larr; 전체 포스트</a>
 				<h1>#{tag}</h1>
 				<p>{posts.length}개의 포스트</p>
-				<a href="/blog/">&larr; 전체 포스트</a>
 			</div>
 			<section>
 				<ul>
@@ -128,7 +128,7 @@ const { tag, posts } = Astro.props;
 						posts.map((post) => (
 							<li>
 								<a href={`/blog/${post.id}/`}>
-									<h4 class="title">{post.data.title}</h4>
+									<h5 class="title">{post.data.title}</h5>
 									<p class="date">
 										<FormattedDate date={post.data.pubDate} />
 									</p>
