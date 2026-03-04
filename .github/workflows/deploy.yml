@@ -26,9 +26,6 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install npm 11
-        run: npm install -g npm@11
-
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
